@@ -34,9 +34,13 @@ from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from bson import BSON, json_util
 from bson.objectid import ObjectId
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+try:
+    from docx import Document
+    from docx.shared import Pt
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    DOCX_AVAILABLE = True
+except Exception:
+    DOCX_AVAILABLE = False
 
 
 def parse_args() -> argparse.Namespace:
@@ -590,12 +594,13 @@ def write_reports(output_dir: str, report: Dict[str, Any]) -> None:
         pass
 
     # DOCX exports (English and Traditional Chinese)
-    try:
-        export_docx(report, os.path.join(output_dir, "report_en.docx"), lang="en")
-        export_docx(report, os.path.join(output_dir, "report_zh-TW.docx"), lang="zh-TW")
-    except Exception as exc:
-        # do not fail whole run due to docx export
-        pass
+    if DOCX_AVAILABLE:
+        try:
+            export_docx(report, os.path.join(output_dir, "report_en.docx"), lang="en")
+            export_docx(report, os.path.join(output_dir, "report_zh-TW.docx"), lang="zh-TW")
+        except Exception:
+            # do not fail whole run due to docx export
+            pass
 
 
 def export_docx(report: Dict[str, Any], path: str, lang: str = "en") -> None:

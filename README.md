@@ -27,8 +27,24 @@ python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.
 
 ### 使用示例
 
+推荐使用环境变量或 `.env`，避免在公开仓库暴露敏感信息：
+
+1) 直接使用环境变量（示例）：
 ```bash
-python scripts/mongo_health_check.py --uri "mongodb+srv://new-user-01:new-user-01@clusterm10.4y4hg.mongodb.net/?retryWrites=true&w=majority&appName=ClusterM10" --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+set MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<appName>"
+python scripts/mongo_health_check.py --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+```
+
+2) 使用 `.env` 文件（推荐本地开发）：
+- 复制根目录的 `env.example` 为 `.env`，并填写 `MONGODB_URI`
+- 运行：
+```bash
+python scripts/mongo_health_check.py --output-dir report
+```
+
+3) 指定自定义 `.env` 路径：
+```bash
+python scripts/mongo_health_check.py --env-file ".env.local" --output-dir report
 ```
 
 可选参数：
@@ -67,6 +83,11 @@ python scripts/mongo_health_check.py --uri "<YOUR_MONGODB_URI>" --dbs appdb --co
 ### 安全性
 
 脚本仅执行只读操作（stats、aggregate $sample、find limit）。在权限不足时自动降级并记录说明。
+
+为避免凭证泄露：
+- 不要将真实连接字符串写入 README、代码或提交历史
+- 使用 `MONGODB_URI` 环境变量或 `.env` 文件（`.gitignore` 已忽略 `.env`）
+- 在 CI/CD 中使用仓库机密变量（如 GitHub Actions Secrets）
 
 ### 许可
 

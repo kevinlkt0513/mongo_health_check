@@ -41,7 +41,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="MongoDB health check and design review")
-    parser.add_argument("--uri", required=True, help="MongoDB connection URI")
+    parser.add_argument("--uri", required=False, default="", help="MongoDB connection URI (overrides env)")
+    parser.add_argument("--env-file", default="", help="Path to .env file to load (optional)")
     parser.add_argument("--dbs", default="", help="Comma-separated database names to include")
     parser.add_argument("--collections", default="", help="Comma-separated collection names to include (applies to provided dbs)")
     parser.add_argument("--sample-size", type=int, default=200, help="Per-collection sample size for schema inference")
@@ -1025,8 +1026,29 @@ def render_markdown(report: Dict[str, Any], lang: str = "en") -> str:
 
 def main() -> int:
     args = parse_args()
+    # Optional .env loading
+    env_path = args.env_file or os.environ.get("ENV_FILE", "")
+    if env_path:
+        try:
+            from dotenv import load_dotenv  # type: ignore
+            load_dotenv(dotenv_path=env_path, override=False)
+        except Exception:
+            pass
+    else:
+        # load default .env if exists in project root
+        try:
+            from dotenv import load_dotenv  # type: ignore
+            load_dotenv(override=False)
+        except Exception:
+            pass
+
+    # Determine MongoDB URI: CLI > env var
+    effective_uri = args.uri.strip() or os.environ.get("MONGODB_URI", "").strip()
+    if not effective_uri:
+        print("Missing MongoDB URI. Provide --uri or set MONGODB_URI in environment or .env", file=sys.stderr)
+        return 2
     rng = random.Random(args.seed)
-    client = MongoClient(args.uri, serverSelectionTimeoutMS=args.timeout_ms)
+    client = MongoClient(effective_uri, serverSelectionTimeoutMS=args.timeout_ms)
     report: Dict[str, Any] = {
         "generatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "server": {},
@@ -1046,7 +1068,7 @@ def main() -> int:
     server_info = get_server_info(client)
     report["server"] = server_info
     # recommendations
-    report["uriRecommendations"] = recommend_uri_tweaks(args.uri, server_info)
+        report["uriRecommendations"] = recommend_uri_tweaks(effective_uri, server_info)
 
     # targets
     include_dbs = [s for s in (x.strip() for x in args.dbs.split(",")) if s]

@@ -15,8 +15,25 @@ python -m venv .venv && .venv/ScriptS/pip install -r requirements.txt
 ```
 
 ### Quick Start
+
+Use environment variables or `.env` to avoid exposing secrets in public repos.
+
+1) Environment variable:
 ```bash
-python scripts/mongo_health_check.py --uri "<YOUR_MONGODB_URI>" --dbs appdb --collections orders --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+export MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<appName>"
+python scripts/mongo_health_check.py --dbs appdb --collections orders --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+```
+
+2) `.env` file:
+- Copy `env.example` to `.env` and fill `MONGODB_URI`.
+- Run:
+```bash
+python scripts/mongo_health_check.py --dbs appdb --collections orders --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+```
+
+3) Custom env file path:
+```bash
+python scripts/mongo_health_check.py --env-file ".env.local" --output-dir report
 ```
 
 Options:

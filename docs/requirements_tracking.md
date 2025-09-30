@@ -17,8 +17,9 @@
 
 ## 二、输入与运行方式
 
-- 必填：MongoDB 连接字符串（URI），例如：
-  - `mongodb+srv://new-user-01:new-user-01@clusterm10.4y4hg.mongodb.net/?retryWrites=true&w=majority&appName=ClusterM10`
+- 必填：MongoDB 连接字符串（URI）。为避免敏感信息暴露，请使用环境变量或 `.env`：
+  - 环境变量：`MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<appName>"`
+  - `.env` 文件：复制 `env.example` 为 `.env` 并填写 `MONGODB_URI`
 - 可选：
   - 限定数据库：`--dbs db1,db2`
   - 限定集合：`--collections coll1,coll2`（若提供 `--dbs` 与 `--collections`，则对指定 DB 的指定集合生效）

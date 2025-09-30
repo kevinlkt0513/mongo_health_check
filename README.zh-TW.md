@@ -15,8 +15,25 @@ python -m venv .venv && .venv/ScriptS/pip install -r requirements.txt
 ```
 
 ### 快速開始
+
+建議使用環境變數或 `.env`，避免在公開倉庫暴露敏感資訊：
+
+1) 使用環境變數（範例）：
 ```bash
-python scripts/mongo_health_check.py --uri "<YOUR_MONGODB_URI>" --dbs appdb --collections orders --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+export MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<appName>"
+python scripts/mongo_health_check.py --dbs appdb --collections orders --sample-size 200 --max-docs-per-coll 5000 --output-dir report
+```
+
+2) 使用 `.env`（本地開發建議）：
+- 複製根目錄的 `env.example` 為 `.env`，填入 `MONGODB_URI`
+- 執行：
+```bash
+python scripts/mongo_health_check.py --output-dir report
+```
+
+3) 指定自訂 `.env` 路徑：
+```bash
+python scripts/mongo_health_check.py --env-file ".env.local" --output-dir report
 ```
 
 常用參數：

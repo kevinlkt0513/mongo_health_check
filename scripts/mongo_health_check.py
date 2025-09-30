@@ -1068,7 +1068,7 @@ def main() -> int:
     server_info = get_server_info(client)
     report["server"] = server_info
     # recommendations
-        report["uriRecommendations"] = recommend_uri_tweaks(effective_uri, server_info)
+    report["uriRecommendations"] = recommend_uri_tweaks(effective_uri, server_info)
 
     # targets
     include_dbs = [s for s in (x.strip() for x in args.dbs.split(",")) if s]
